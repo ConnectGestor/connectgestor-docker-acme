@@ -2,8 +2,8 @@
 
 # Função para mostrar a mensagem de uso
 show_usage() {
-    echo -e     "Uso: \n\n      curl -sSL https://update.ticke.tz | sudo bash\n\n"
-    echo -e "Exemplo: \n\n      curl -sSL https://update.ticke.tz | sudo bash\n\n"
+    echo -e     "Uso: \n\n      curl -sSL https://raw.githubusercontent.com/ConnectGestor/connectgestor-docker-acme/main/update.sh | sudo bash\n\n"
+    echo -e "Exemplo: \n\n      curl -sSL https://raw.githubusercontent.com/ConnectGestor/connectgestor-docker-acme/main/update.sh | sudo bash\n\n"
 }
 
 # Função para sair com erro
@@ -46,7 +46,7 @@ if [ -f docker-compose-acme.yaml ] && [ -f .env-backend-acme ] && [ -n "${BACKEN
    echored "  Este processo irá converter uma instalação   "
    echored "  manual a partir do fonte por uma instalação  "
    echored "  a partir de imagens pré compiladas do        "
-   echored "  projeto ticketz                              "
+   echored "  projeto connectgestor                              "
    echored "                                               "
    echored "  Aguarde 20 segundos.                         "
    echored "                                               "
@@ -57,14 +57,14 @@ if [ -f docker-compose-acme.yaml ] && [ -f .env-backend-acme ] && [ -n "${BACKEN
 
    docker compose -f docker-compose-acme.yaml down
 
-   docker volume create --name ticketz-docker-acme_backend_public || exit 1
-   docker run --rm -v ${BACKEND_PUBLIC_VOL}:/from -v ticketz-docker-acme_backend_public:/to alpine ash -c "cd /from ; cp -a . /to"
+   docker volume create --name connectgestor-docker-acme_backend_public || exit 1
+   docker run --rm -v ${BACKEND_PUBLIC_VOL}:/from -v connectgestor-docker-acme_backend_public:/to alpine ash -c "cd /from ; cp -a . /to"
 
-   docker volume create --name ticketz-docker-acme_backend_private || exit 1
-   docker run --rm -v ${BACKEND_PRIVATE_VOL}:/from -v ticketz-docker-acme_backend_private:/to alpine ash -c "cd /from ; cp -a . /to"
+   docker volume create --name connectgestor-docker-acme_backend_private || exit 1
+   docker run --rm -v ${BACKEND_PRIVATE_VOL}:/from -v connectgestor-docker-acme_backend_private:/to alpine ash -c "cd /from ; cp -a . /to"
 
-   docker volume create --name ticketz-docker-acme_postgres_data || exit 1
-   docker run --rm -v ${POSTGRES_VOL}:/from -v ticketz-docker-acme_postgres_data:/to alpine ash -c "cd /from ; cp -a . /to"
+   docker volume create --name connectgestor-docker-acme_postgres_data || exit 1
+   docker run --rm -v ${POSTGRES_VOL}:/from -v connectgestor-docker-acme_postgres_data:/to alpine ash -c "cd /from ; cp -a . /to"
    
    . .env-backend-acme
    
@@ -83,18 +83,23 @@ if [ -f docker-compose-acme.yaml ] && [ -f .env-backend-acme ] && [ -n "${BACKEN
    exit 0
 fi
 
-if [ -d ticketz-docker-acme ] && [ -f ticketz-docker-acme/docker-compose.yaml ] ; then
-  cd ticketz-docker-acme
+[ -f credentials.env ] && . credentials.env
+
+[ -n "${DOCKER_REGISTRY}" ] && [ -n "${DOCKER_USER}" ] && [ -n "${DOCKER_PASSWORD}" ] && \
+echo ${DOCKER_PASSWORD} | docker login ${DOCKER_REGISTRY} --username ${DOCKER_USER} --password-stdin
+
+if [ -d connectgestor-docker-acme ] && [ -f connectgestor-docker-acme/docker-compose.yaml ] ; then
+  cd connectgestor-docker-acme
 elif [ -f docker-compose.yaml ] ; then
   ## nothing to do, already here
   echo -n "" > /dev/null
 elif [ "${SUDO_USER}" = "root" ] ; then
-  cd /root/ticketz-docker-acme || exit 1
+  cd /root/connectgestor-docker-acme || exit 1
 else
-  cd /home/${SUDO_USER}/ticketz-docker-acme || exit 1
+  cd /home/${SUDO_USER}/connectgestor-docker-acme || exit 1
 fi
 
-echo "Working on $PWD/ticketz-docker-acme folder"
+echo "Working on $PWD/connectgestor-docker-acme folder"
 
 if ! [ -f docker-compose.yaml ] ; then
   echo "docker-compose.yaml não encontrado" > /dev/stderr
